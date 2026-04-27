@@ -13,6 +13,14 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
 
+  // ✅ logout moved ABOVE useEffect
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  }, []);
+
+  // ✅ now logout is available here
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -23,7 +31,7 @@ export const AuthProvider = ({ children }) => {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [logout]);
 
   const login = useCallback(async (email, password) => {
     const { data } = await authAPI.login({ email, password });
@@ -39,12 +47,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(data.user));
     setUser(data.user);
     return data;
-  }, []);
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
   }, []);
 
   return (
