@@ -6,6 +6,7 @@ import SummaryCards from '../components/SummaryCards';
 import FilterBar from '../components/FilterBar';
 import TransactionList from '../components/TransactionList';
 import MonthlyChart from '../components/MonthlyChart';
+import CategoryChart from '../components/CategoryChart';
 import AddTransactionModal from '../components/AddTransactionModal';
 
 const DashboardPage = () => {
@@ -68,10 +69,17 @@ const DashboardPage = () => {
 
         <MonthlyChart year={year} />
 
+        {/* ✅ Category pie chart — shows expense/income breakdown */}
+        {!summaryLoading && summary && (
+          <CategoryChart summary={summary} />
+        )}
+
         <TransactionList
           transactions={transactions}
           loading={txnLoading}
           onDeleted={handleRefresh}
+          month={month}
+          year={year}
         />
       </main>
 

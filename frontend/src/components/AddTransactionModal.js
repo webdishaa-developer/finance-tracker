@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { transactionAPI } from '../api/services';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../utils/helpers';
 
@@ -13,7 +14,6 @@ const defaultForm = {
 
 const AddTransactionModal = ({ onClose, onSuccess }) => {
   const [form, setForm] = useState(defaultForm);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const categories = form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
@@ -29,9 +29,9 @@ const AddTransactionModal = ({ onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     if (!form.amount || Number(form.amount) <= 0) {
-      return setError('Enter a valid amount');
+      toast.error('Enter a valid amount');
+      return;
     }
     setLoading(true);
     try {
@@ -39,10 +39,11 @@ const AddTransactionModal = ({ onClose, onSuccess }) => {
         ...form,
         amount: Number(form.amount),
       });
+      toast.success(`${form.type === 'income' ? 'Income' : 'Expense'} added successfully!`);
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add transaction');
+      toast.error(err.response?.data?.message || 'Failed to add transaction');
     } finally {
       setLoading(false);
     }
@@ -57,8 +58,6 @@ const AddTransactionModal = ({ onClose, onSuccess }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
-          {error && <div className="alert alert-error">{error}</div>}
-
           <div className="type-toggle">
             <button
               type="button"

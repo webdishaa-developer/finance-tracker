@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { transactionAPI } from '../api/services';
+import toast from 'react-hot-toast';
+import { transactionAPI, exportToCSV } from '../api/services';
 import { formatCurrency, formatDate } from '../utils/helpers';
 
-const TransactionList = ({ transactions, loading, onDeleted }) => {
+const TransactionList = ({ transactions, loading, onDeleted, month, year }) => {
   const [deletingId, setDeletingId] = useState(null);
 
   const handleDelete = async (id) => {
@@ -10,12 +11,22 @@ const TransactionList = ({ transactions, loading, onDeleted }) => {
     setDeletingId(id);
     try {
       await transactionAPI.delete(id);
+      toast.success('Transaction deleted');
       onDeleted();
     } catch (err) {
-      alert(err.response?.data?.message || 'Delete failed');
+      toast.error(err.response?.data?.message || 'Delete failed');
     } finally {
       setDeletingId(null);
     }
+  };
+
+  const handleExport = () => {
+    if (!transactions.length) {
+      toast.error('No transactions to export');
+      return;
+    }
+    exportToCSV(transactions, month, year);
+    toast.success('CSV downloaded!');
   };
 
   if (loading) {
@@ -46,9 +57,14 @@ const TransactionList = ({ transactions, loading, onDeleted }) => {
 
   return (
     <div className="transactions-section">
-      <h3 className="section-title">
-        Transactions <span className="count-badge">{transactions.length}</span>
-      </h3>
+      <div className="section-header">
+        <h3 className="section-title">
+          Transactions <span className="count-badge">{transactions.length}</span>
+        </h3>
+        <button className="btn btn-ghost btn-sm" onClick={handleExport}>
+          ↓ Export CSV
+        </button>
+      </div>
       <div className="transaction-table-wrapper">
         <table className="transaction-table">
           <thead>

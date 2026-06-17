@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
 const LoginPage = ({ onSwitch }) => {
   const { login } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
     try {
       await login(form.email, form.password);
+      toast.success('Welcome back!');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      toast.error(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -31,7 +31,6 @@ const LoginPage = ({ onSwitch }) => {
       </div>
       <form onSubmit={handleSubmit} className="auth-form">
         <h2>Sign In</h2>
-        {error && <div className="alert alert-error">{error}</div>}
         <div className="form-group">
           <label>Email</label>
           <input
